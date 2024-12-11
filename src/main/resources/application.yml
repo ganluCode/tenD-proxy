@@ -1,0 +1,9 @@
+server:
+  port: 8080
+saas:
+  auth:
+    path: auth
+    fileName: public_70aa39752b0b4a069bd9db77005d51c2.key
+  service:
+    url: http://api.longdundata.com/service
+    uid: 70aa39752b0b4a069bd9db77005d51c2
