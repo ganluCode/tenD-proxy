@@ -1,14 +1,24 @@
 package com.tend.proxy.common.utils;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
+@Component
 public class HttpRequest {
+    @Value("${http.proxy.enable}")
+    private  Boolean enableProxy;
+    @Value("${http.proxy.host}")
+    private  String proxyHost;
+    @Value("${http.proxy.port}")
+    private  Integer proxyPort;
+
+
     /**
      * 向指定URL发送GET方法的请求
      *
@@ -16,14 +26,20 @@ public class HttpRequest {
      * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return URL 所代表远程资源的响应结果
      */
-    public static String sendGet(String url, String param) {
+    public String sendGet(String url, String param) {
         String result = "";
         BufferedReader in = null;
         try {
             String urlNameString = url + "?" + param;
             URL realUrl = new URL(urlNameString);
+            URLConnection connection;
             // 打开和URL之间的连接
-            URLConnection connection = realUrl.openConnection();
+            if (enableProxy){
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+                connection = realUrl.openConnection(proxy);
+            }else {
+                connection= realUrl.openConnection();
+            }
             // 设置通用的请求属性
             connection.setRequestProperty("accept", "*/*");
             connection.setRequestProperty("connection", "Keep-Alive");
@@ -68,14 +84,20 @@ public class HttpRequest {
      * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return 所代表远程资源的响应结果
      */
-    public static String sendPost(String url, String param) {
+    public String sendPost(String url, String param) {
         PrintWriter outPrintWriter = null;
         String result = "";
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             URL realUrl = new URL(url);
+            HttpURLConnection conn;
             // 打开和URL之间的连接
-            HttpURLConnection conn = (HttpURLConnection) realUrl.openConnection();
+            if (enableProxy){
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+                conn = (HttpURLConnection) realUrl.openConnection(proxy);
+            }else {
+                conn= (HttpURLConnection) realUrl.openConnection();
+            }
             // 设置通用的请求属性
             conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("connection", "Keep-Alive");

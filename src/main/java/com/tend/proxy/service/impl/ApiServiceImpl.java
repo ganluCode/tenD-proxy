@@ -5,6 +5,7 @@ import com.tend.proxy.common.utils.AuthUtils;
 import com.tend.proxy.common.utils.HttpRequest;
 import com.tend.proxy.service.IApiService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,9 @@ public class ApiServiceImpl implements IApiService {
     @Value("${saas.auth.path}")
     private String authPath;
 
+    @Autowired
+    private HttpRequest httpRequest;
+
     private static final String ENT_INVOICE_INFO_SERVICE_NAME = "getOpeningBankInfo";
     private static final String OPENING_BANK_INFO_SERVICE_NAME = "getOpeningBankInfo";
     @Override
@@ -56,7 +60,7 @@ public class ApiServiceImpl implements IApiService {
         String serverParams = getServerJsonStr(uid, serverName, params);
         String postParams = MessageFormat.format("uid={0}&data={1}", uid, getPostJsonStr(serverParams));
         //获取数据   String postParams = MessageF
-        String result = HttpRequest.sendPost(serviceUrl, postParams);
+        String result = httpRequest.sendPost(serviceUrl, postParams);
         result = URLDecoder.decode(result, "UTF-8");
         //转换数据
         Map<String, Object> resultMap = JSONDecoder.decode(result);
